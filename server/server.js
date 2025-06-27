@@ -5,16 +5,15 @@ const fastifyCors = require('@fastify/cors')
 const dotenv = require('dotenv')
 const routes = require('./routes')
 const {initUsers} = require("./controllers/auth.controller");
-const cors = require('@fastify/cors');
 dotenv.config()
 
 const fastify = Fastify({ logger: true })
 
 fastify.register(fastifyCors, {
     origins: [
-        'http://localhost:5173/',
-        'http://127.0.0.1:7070/',
-        'http://34.116.235.254:7070/'
+        'http://localhost:5173',
+        'http://127.0.0.1:7070',
+        'http://34.116.235.254:7070'
     ],
 })
 
