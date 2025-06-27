@@ -16,16 +16,6 @@ fastify.register(fastifyCors, {
     credentials: true
 })
 
-fastify.options('*', (req, reply) => {
-    reply
-        .code(204)
-        .header('Access-Control-Allow-Origin', req.headers.origin || '*')
-        .header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        .header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '*')
-        .header('Access-Control-Allow-Credentials', 'true')
-        .send()
-})
-
 fastify.register(routes, { prefix: '/api' })
 
 fastify.register(fastifyStatic, {
