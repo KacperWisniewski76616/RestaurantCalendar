@@ -24,7 +24,6 @@ const handleLogout = async () => {
       </v-btn>
     </v-app-bar>
 
-    <!-- Content - bez v-main, bez containerów! -->
     <div class="layout-content">
       <v-card color="error" v-if="AuthStore.getUserListError" :title="AuthStore.getUserListError"/>
       <RouterView/>
@@ -35,21 +34,21 @@ const handleLogout = async () => {
 <style>
 .layout-content {
   min-height: 100vh;
+  min-width: 100vw;
   padding: 64px 24px;
   background: #fff;
-  height: auto;
-  width: 100vw;
   margin: 0;
+  height: 100%;
+  overflow-y: auto;
 }
 body, html, #app {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
+  min-width: 100vw;
   background: #222;
   overflow: hidden;
 }
-.v-container {
-  height: 100%;
-  overflow-y: auto;
-}
+
 </style>
