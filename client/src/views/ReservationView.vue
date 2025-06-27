@@ -5,7 +5,7 @@ import type {IReservationDto} from "@/types";
 import moment from "moment";
 
 const minDate = moment().format('YYYY-MM-DD')
-const getNextAvailableTimeSlot = (): { date: string, time: string } =>  {
+const getNextAvailableTimeSlot = (): { date: string, time: string } => {
   const now = moment()
   const startHour = 16
   const endHour = 22
@@ -34,6 +34,7 @@ const getNextAvailableTimeSlot = (): { date: string, time: string } =>  {
     time: candidate.format('HH:mm')
   }
 }
+
 const ReservationStore = useReservationStore()
 const AuthStore = useAuthStore()
 const formInit = {
@@ -63,6 +64,8 @@ const loading = computed(() => ReservationStore.getLoading)
 const error = computed(() => ReservationStore.getError)
 const reservationList = computed(() => ReservationStore.getReservations.filter(r => r.user === AuthStore.getUserData?._id))
 const tableList = computed(() => ReservationStore.getTables)
+const existErrorDelete = ref<boolean>(false)
+const deleteSuccess = ref<boolean>(false)
 
 const timeOptions = computed(() => {
   const options = []
@@ -132,6 +135,18 @@ const submit = async () => {
     form.value.table_id = formInit.table_id
     successModal.value = true
   }
+}
+
+const deleteRes = async (id: string) => {
+  await ReservationStore.deleteReservation(id)
+
+  if (!existErrorDelete.value)
+    await nextTick(async () => {
+      await loadData()
+      deleteSuccess.value = true
+    })
+  else
+    existErrorDelete.value = true
 }
 
 const loadData = async () => {
@@ -255,7 +270,9 @@ onMounted(async () => {
           :items-per-page="10"
         >
           <template #item.user="{item}">
-            {{AuthStore.getUserData && AuthStore.getUserData._id === item.user ? AuthStore.getUserData.name + ' ' + AuthStore.getUserData.lastName : 'Nieznany użytkownik'}}
+            {{
+              AuthStore.getUserData && AuthStore.getUserData._id === item.user ? AuthStore.getUserData.name + ' ' + AuthStore.getUserData.lastName : 'Nieznany użytkownik'
+            }}
           </template>
 
           <template #item.date="{ item }">
@@ -275,11 +292,16 @@ onMounted(async () => {
           </template>
 
           <template #item.actions="{ item }">
-            <div class="flex flex-row justify-between align-center">
+            <div v-if="item._id" class="flex flex-row justify-between align-center">
               <v-btn color="primary" size="small" variant="text" icon="mdi-file-edit"/>
 
-              <v-btn color="error" size="small" variant="text" icon="mdi-delete">
-              </v-btn>
+              <v-btn color="error"
+                     size="small"
+                     variant="text"
+                     icon="mdi-delete"
+                     :disabled="ReservationStore.isDeleteLoading"
+                     :loading="ReservationStore.isDeleteLoading"
+                     @click="deleteRes(item._id)"/>
             </div>
           </template>
         </v-data-table>
@@ -292,6 +314,22 @@ onMounted(async () => {
       v-model="successModal"
     >
       Pomyślnie utworzono rezerwację
+    </v-snackbar>
+
+    <v-snackbar
+      :timeout="2000"
+      color="success"
+      v-model="deleteSuccess"
+    >
+      Pomyślnie usunięto rezerwację
+    </v-snackbar>
+
+    <v-snackbar
+      :timeout="2000"
+      color="error"
+      v-model="existErrorDelete"
+    >
+      {{ ReservationStore.getDeleteError }}
     </v-snackbar>
   </v-container>
 </template>

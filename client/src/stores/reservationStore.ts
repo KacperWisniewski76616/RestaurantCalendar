@@ -8,18 +8,25 @@ import {CommonUtils} from "@/utils";
 export const useReservationStore = defineStore('resertations', () => {
   const resList = ref<IReservationDto[]>([])
   const tableList = ref<ITableDto[]>([])
+
   const resListLoading = ref<boolean>(false)
   const tableListLoading = ref<boolean>(false)
   const resCreateLoading = ref<boolean>(false)
+  const resDeleteLoading = ref<boolean>(false)
+  const createTableLoading = ref<boolean>(false)
 
   const resListError = ref<string>()
   const tableListError = ref<string>()
   const resCreateError = ref<string>()
+  const resDeleteError = ref<string>()
+  const createTableError = ref<string>()
 
   const getReservations: ComputedRef<IReservationDto[]> = computed(() => resList.value)
   const getTables: ComputedRef<ITableDto[]> = computed(() => tableList.value)
-  const getLoading: ComputedRef<boolean> = computed(() => resListLoading.value || tableListLoading.value || resCreateLoading.value)
-  const getError: ComputedRef<string|undefined> = computed(() => resListError.value ?? resListError.value ?? resCreateError.value)
+  const getLoading: ComputedRef<boolean> = computed(() => resListLoading.value || tableListLoading.value || resCreateLoading.value || createTableLoading.value)
+  const getError: ComputedRef<string|undefined> = computed(() => resListError.value ?? resListError.value ?? resCreateError.value ?? createTableError.value)
+  const isDeleteLoading: ComputedRef<boolean> = computed(() => resDeleteLoading.value)
+  const getDeleteError: ComputedRef<string|undefined> = computed(() => resDeleteError.value)
 
   const fetchReservations = async () => {
     resList.value = []
@@ -66,13 +73,45 @@ export const useReservationStore = defineStore('resertations', () => {
     }
   }
 
+  const createTable = async (form: ITableDto) => {
+    createTableLoading.value = true
+    createTableError.value = undefined
+
+    try {
+      await restaurantApi.post('/tables/new', form)
+    } catch (e) {
+      createTableError.value = CommonUtils.validateError(e)
+    } finally {
+      createTableLoading.value = false
+    }
+  }
+
+  const deleteReservation = async (id: string) => {
+    resDeleteLoading.value = true
+    resDeleteError.value = undefined
+
+    try {
+      await restaurantApi.delete(`/reservations/${id}`)
+    } catch (e) {
+      resDeleteError.value = CommonUtils.validateError(e)
+    } finally {
+      resDeleteLoading.value = false
+    }
+  }
+
+
+
   return {
     getError,
     getReservations,
     getTables,
     getLoading,
+    isDeleteLoading,
+    getDeleteError,
     fetchReservations,
     fetchTables,
-    createReservation
+    createReservation,
+    deleteReservation,
+    createTable
   }
 })
