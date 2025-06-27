@@ -1,16 +1,18 @@
 const User = require('../db/schemas/User')
 const bcrypt = require('bcrypt')
 
-const login = async (username, pass) => {
-    const user = await User.findOne({mail: username}).lean()
+const login = async (data) => {
+    const user = await User.findOne({email: data.username}).lean()
 
-    if(!user) throw new Error('User not found')
-
-    if(bcrypt.compare(pass, user.pass)) return user
+    if (!user) throw new Error('User not found')
+    const correctPass = await bcrypt.compare(data.pass, user.pass)
+    if (correctPass) return user
 
     throw new Error('Wrong mail or password')
 }
 
+const getUsers = async () => await User.find()
 module.exports = {
-    login
+    login,
+    getUsers
 }

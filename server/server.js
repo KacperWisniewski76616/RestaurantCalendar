@@ -1,9 +1,10 @@
 const Fastify = require('fastify')
 const path = require('path')
 const fastifyStatic = require('@fastify/static')
-const fastifyCors = require('@fastify/cors') // ⬅️ dodaj to
+const fastifyCors = require('@fastify/cors')
 const dotenv = require('dotenv')
 const routes = require('./routes')
+const bcrypt = require('bcrypt')
 dotenv.config()
 
 const fastify = Fastify({ logger: true })
@@ -40,5 +41,8 @@ const start = async () => {
 }
 
 start()
-    .then(() => console.log(`Server started at port: ${process.env.PORT}`))
+    .then(() => {
+        console.log(`Server started at port: ${process.env.PORT}`)
+        bcrypt.hash('userpass', 12).then((r) => console.log(r))
+    })
     .catch((e) => console.log('Error here: ', e))

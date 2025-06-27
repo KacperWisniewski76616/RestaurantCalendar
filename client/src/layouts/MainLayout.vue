@@ -1,6 +1,9 @@
 <script setup lang="ts">
-const handleLogout = () => {
-  console.log('logOut')
+import {useAuthStore} from "@/stores";
+
+const AuthStore = useAuthStore()
+const handleLogout = async () => {
+  await AuthStore.logout()
 }
 </script>
 
@@ -12,7 +15,7 @@ const handleLogout = () => {
       <v-btn to="/reservations" variant="text" class="mx-2" exact>
         Rezerwacje
       </v-btn>
-      <v-btn to="/admin-panel" variant="text" class="mx-2" exact>
+      <v-btn v-if="AuthStore.getUserData && AuthStore.getUserData.isAdmin" to="/admin-panel" variant="text" class="mx-2" exact>
         Admin Panel
       </v-btn>
       <v-spacer/>
@@ -23,6 +26,7 @@ const handleLogout = () => {
 
     <!-- Content - bez v-main, bez containerów! -->
     <div class="layout-content">
+      <v-card color="error" v-if="AuthStore.getUserListError" :title="AuthStore.getUserListError"/>
       <RouterView/>
     </div>
   </v-app>

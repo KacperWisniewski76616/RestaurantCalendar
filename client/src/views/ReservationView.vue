@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useReservationStore} from "@/stores";
+import {useAuthStore, useReservationStore} from "@/stores";
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import type {IReservationDto} from "@/types";
 import moment from "moment";
@@ -35,8 +35,9 @@ const getNextAvailableTimeSlot = (): { date: string, time: string } =>  {
   }
 }
 const ReservationStore = useReservationStore()
+const AuthStore = useAuthStore()
 const formInit = {
-  user: '685d88c03e29c7996cbd7c86',
+  user: AuthStore.getUserData?._id ?? '',
   ...getNextAvailableTimeSlot(),
   desc: '',
   guests: 2,
@@ -60,7 +61,7 @@ const successModal = ref<boolean>(false)
 
 const loading = computed(() => ReservationStore.getLoading)
 const error = computed(() => ReservationStore.getError)
-const reservationList = computed(() => ReservationStore.getReservations)
+const reservationList = computed(() => ReservationStore.getReservations.filter(r => r.user === AuthStore.getUserData?._id))
 const tableList = computed(() => ReservationStore.getTables)
 
 const timeOptions = computed(() => {
@@ -105,7 +106,7 @@ const tableOptions = computed(() => {
   return ReservationStore.getTables.filter(t =>
     t.capacity >= form.value.guests
     && t.min <= form.value.guests
-    && !reservationList.value
+    && !ReservationStore.getReservations
       .some(r =>
         r.table_id === t._id
         && r.date === form.value.date
@@ -156,6 +157,7 @@ onMounted(async () => {
       ></v-progress-circular>
     </v-overlay>
 
+    <v-card v-if="error" color="error" :title="error"></v-card>
 
     <v-card>
       <v-form @submit.prevent="submit">
@@ -252,6 +254,10 @@ onMounted(async () => {
           :items="reservationList"
           :items-per-page="10"
         >
+          <template #item.user="{item}">
+            {{AuthStore.getUserData && AuthStore.getUserData._id === item.user ? AuthStore.getUserData.name + ' ' + AuthStore.getUserData.lastName : 'Nieznany użytkownik'}}
+          </template>
+
           <template #item.date="{ item }">
             {{ item.date }}
           </template>
