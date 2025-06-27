@@ -21,7 +21,9 @@ fastify.register(fastifyStatic, {
     root: path.join(__dirname, '../client/dist'),
     prefix: '/',
 })
-
+fastify.options('*', (req, reply) => {
+    reply.send();
+});
 fastify.setNotFoundHandler(function (request, reply) {
     if (request.raw.method === 'GET' && !request.raw.url.startsWith('/api')) {
         reply.type('text/html').sendFile('index.html')
