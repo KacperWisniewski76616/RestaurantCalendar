@@ -13,7 +13,6 @@ fastify.register(fastifyCors, {
     origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['*'],
-    credentials: true
 })
 
 fastify.register(routes, { prefix: '/api' })
