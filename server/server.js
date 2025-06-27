@@ -10,11 +10,7 @@ dotenv.config()
 const fastify = Fastify({ logger: true })
 
 fastify.register(fastifyCors, {
-    origins: [
-        'http://localhost:5173',
-        'http://127.0.0.1:7070',
-        'http://34.116.235.254:7070'
-    ],
+    origin: true,
 })
 
 fastify.register(routes, { prefix: '/api' })
