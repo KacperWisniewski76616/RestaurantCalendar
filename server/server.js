@@ -5,6 +5,7 @@ const fastifyCors = require('@fastify/cors')
 const dotenv = require('dotenv')
 const routes = require('./routes')
 const bcrypt = require('bcrypt')
+const {initUsers} = require("./controllers/auth.controller");
 dotenv.config()
 
 const fastify = Fastify({ logger: true })
@@ -43,6 +44,6 @@ const start = async () => {
 start()
     .then(() => {
         console.log(`Server started at port: ${process.env.PORT}`)
-        bcrypt.hash('userpass', 12).then((r) => console.log(r))
+        initUsers().then(() => console.log('[INIT] USERS'))
     })
     .catch((e) => console.log('Error here: ', e))
