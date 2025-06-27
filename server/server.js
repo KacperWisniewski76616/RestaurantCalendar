@@ -4,7 +4,7 @@ const fastifyStatic = require('@fastify/static')
 const fastifyCors = require('@fastify/cors')
 const dotenv = require('dotenv')
 const routes = require('./routes')
-const {initUsers} = require("./controllers/auth.controller");
+const { initUsers } = require('./controllers/auth.controller')
 dotenv.config()
 
 const fastify = Fastify({ logger: true })
@@ -13,6 +13,17 @@ fastify.register(fastifyCors, {
     origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['*'],
+    credentials: true
+})
+
+fastify.options('*', (req, reply) => {
+    reply
+        .code(204)
+        .header('Access-Control-Allow-Origin', req.headers.origin || '*')
+        .header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        .header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '*')
+        .header('Access-Control-Allow-Credentials', 'true')
+        .send()
 })
 
 fastify.register(routes, { prefix: '/api' })
@@ -21,9 +32,7 @@ fastify.register(fastifyStatic, {
     root: path.join(__dirname, '../client/dist'),
     prefix: '/',
 })
-fastify.options('*', (req, reply) => {
-    reply.send();
-});
+
 fastify.setNotFoundHandler(function (request, reply) {
     if (request.raw.method === 'GET' && !request.raw.url.startsWith('/api')) {
         reply.type('text/html').sendFile('index.html')
