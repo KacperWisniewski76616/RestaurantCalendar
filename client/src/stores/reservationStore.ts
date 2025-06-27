@@ -13,12 +13,14 @@ export const useReservationStore = defineStore('resertations', () => {
   const tableListLoading = ref<boolean>(false)
   const resCreateLoading = ref<boolean>(false)
   const resDeleteLoading = ref<boolean>(false)
+  const resUpdateLoading = ref<boolean>(false)
   const createTableLoading = ref<boolean>(false)
 
   const resListError = ref<string>()
   const tableListError = ref<string>()
   const resCreateError = ref<string>()
   const resDeleteError = ref<string>()
+  const resUpdateError = ref<string>()
   const createTableError = ref<string>()
 
   const getReservations: ComputedRef<IReservationDto[]> = computed(() => resList.value)
@@ -27,6 +29,8 @@ export const useReservationStore = defineStore('resertations', () => {
   const getError: ComputedRef<string|undefined> = computed(() => resListError.value ?? resListError.value ?? resCreateError.value ?? createTableError.value)
   const isDeleteLoading: ComputedRef<boolean> = computed(() => resDeleteLoading.value)
   const getDeleteError: ComputedRef<string|undefined> = computed(() => resDeleteError.value)
+  const isUpdateLoading: ComputedRef<boolean> = computed(() => resUpdateLoading.value)
+  const getUpdateError: ComputedRef<string|undefined> = computed(() => resUpdateError.value)
 
   const fetchReservations = async () => {
     resList.value = []
@@ -73,6 +77,19 @@ export const useReservationStore = defineStore('resertations', () => {
     }
   }
 
+  const updateReservation = async (id: string, form: IReservationDto) => {
+    resUpdateLoading.value = true
+    resUpdateError.value = undefined
+
+    try {
+      await restaurantApi.put(`/reservations/${id}`, form)
+    } catch (e) {
+      resUpdateError.value = CommonUtils.validateError(e)
+    } finally {
+      resUpdateLoading.value = false
+    }
+  }
+
   const createTable = async (form: ITableDto) => {
     createTableLoading.value = true
     createTableError.value = undefined
@@ -108,10 +125,13 @@ export const useReservationStore = defineStore('resertations', () => {
     getLoading,
     isDeleteLoading,
     getDeleteError,
+    getUpdateError,
+    isUpdateLoading,
     fetchReservations,
     fetchTables,
     createReservation,
     deleteReservation,
-    createTable
+    createTable,
+    updateReservation
   }
 })

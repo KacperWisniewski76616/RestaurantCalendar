@@ -3,6 +3,7 @@ import {useAuthStore, useReservationStore} from "@/stores";
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import type {IReservationDto} from "@/types";
 import moment from "moment";
+import UpdateReservationForm from "@/components/UpdateReservationForm.vue";
 
 const minDate = moment().format('YYYY-MM-DD')
 const getNextAvailableTimeSlot = (): { date: string, time: string } => {
@@ -66,6 +67,9 @@ const reservationList = computed(() => ReservationStore.getReservations.filter(r
 const tableList = computed(() => ReservationStore.getTables)
 const existErrorDelete = ref<boolean>(false)
 const deleteSuccess = ref<boolean>(false)
+const updateDialog = ref<boolean>(false)
+const selectedRes = ref<string>()
+const updateSuccess = ref<boolean>(false)
 
 const timeOptions = computed(() => {
   const options = []
@@ -293,7 +297,10 @@ onMounted(async () => {
 
           <template #item.actions="{ item }">
             <div v-if="item._id" class="flex flex-row justify-between align-center">
-              <v-btn color="primary" size="small" variant="text" icon="mdi-file-edit"/>
+              <v-btn color="primary" size="small" variant="text" icon="mdi-file-edit" @click="() => {
+                updateDialog = true
+                selectedRes = item._id
+              }"/>
 
               <v-btn color="error"
                      size="small"
@@ -308,12 +315,31 @@ onMounted(async () => {
       </v-card-text>
     </v-card>
 
+    <v-dialog v-model="updateDialog" max-width="600">
+      <UpdateReservationForm v-if="selectedRes" :id="selectedRes" :close-modal="(success?: boolean) => {
+        updateDialog = false
+        selectedRes = undefined
+        if(!!success) {
+          updateSuccess = true
+          loadData()
+        }
+      }"/>
+    </v-dialog>
+
     <v-snackbar
       :timeout="2000"
       color="success"
       v-model="successModal"
     >
       Pomyślnie utworzono rezerwację
+    </v-snackbar>
+
+    <v-snackbar
+      :timeout="2000"
+      color="success"
+      v-model="updateSuccess"
+    >
+      Pomyślnie zmieniono rezerwację
     </v-snackbar>
 
     <v-snackbar
